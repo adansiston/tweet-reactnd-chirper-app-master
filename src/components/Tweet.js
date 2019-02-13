@@ -8,6 +8,8 @@ import { TiHeartFullOutline } from 'react-icons/ti/index.js'
 
 import { handleToggleTweet } from '../actions/tweets' // importamos a ação criada
 
+import { Link, withRouter } from 'react-router-dom' // para redirecionar corretamente. withRouter é um alternativo ao React Router. pq sem um dos dois não vamos conseguir utilizar o this.props.history, que não será passado
+
 
 class Tweet extends Component {
   handleLike = (e) => {
@@ -23,21 +25,24 @@ class Tweet extends Component {
     }))
         
   }
-  toParent = (e, id) => {
+  toParent = (e, id) => {     // função pré configurada para reponder ao tweet original, do qual p tweet em questão é uma resposta
     e.preventDefault()
-    // todo: Redirect to parent Tweet.
+    this.props.history.push(`/tweet/${id}`)   // redirecionando
   }
   render() {
     const { tweet } = this.props
+    console.log ('tweet a ser exibido', tweet)
 
     if (tweet === null) {
       return <p>This Tweet doesn't existd</p>
     }
     const {
-      name, avatar, timestamp, text, hasLiked, likes, replies, parent
+      name, avatar, timestamp, text, hasLiked, likes, replies, id, parent     // inserimos o id aqui para passar para o link abaixo
     } = tweet
+    console.log ('txt do', text)
+    
     return (
-      <div className='tweet'>
+      <Link to={`/tweet/${id}`} className='tweet'>  {/* vai redirecionar*/}
         <img
           src={avatar}
           alt={`Avatar of ${name}`}
@@ -65,7 +70,7 @@ class Tweet extends Component {
             <span>{likes !== 0 && likes}</span>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }
 }
@@ -79,5 +84,5 @@ function mapStateToProps ({authedUser, users, tweets}, { id }) {
       : null
   }
 }
-export default connect(mapStateToProps)(Tweet)
+export default withRouter(connect(mapStateToProps)(Tweet)) // empacotamos tudo com o withRouter para ter acesso ao history
     

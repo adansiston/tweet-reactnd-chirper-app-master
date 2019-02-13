@@ -1,9 +1,34 @@
-import { saveLikeToggle } from '../utils/api' // importando a função para salvar no backend
-
+import { saveLikeToggle, saveTweet } from '../utils/api' // importando a função saveTweet do backend
+import { showLoading, hideLoading } from 'react-redux-loading' // importando a barrinha
 
 export const RECEIVE_TWEETS = 'RECEIVE_TWEETS'
-export const TOGGLE_TWEET = 'TOGGLE_TWEET'  // nova constatnte
+export const TOGGLE_TWEET = 'TOGGLE_TWEET'
+export const ADD_TWEET = 'ADD_TWEET'  // nova ação
 
+
+
+function addTweet(tweet) {   // ação nova
+  return {
+    type: ADD_TWEET,
+    tweet,
+  }
+}
+
+export function handleAddTweet(text, replyingTo) {   // função que chama a api para atualizar na base e tb atualiza nossa store
+  return (dispatch, getState) => {
+    const { authedUser } = getState()
+
+    dispatch(showLoading())
+
+    return saveTweet({
+      text,
+      author: authedUser,
+      replyingTo
+    })
+      .then((tweet) => dispatch(addTweet(tweet))) // só executa depois da de cima
+      .then(() => dispatch(hideLoading()))  // só executa depois da de cima
+  }
+}
 
 export function receiveTweets(tweets) {
   return {
@@ -12,7 +37,7 @@ export function receiveTweets(tweets) {
   }
 }
 
-function toggleTweet({ id, authedUser, hasLiked }) {  // acção nova definida
+function toggleTweet({ id, authedUser, hasLiked }) {
   return {
     type: TOGGLE_TWEET,
     id,
@@ -22,7 +47,7 @@ function toggleTweet({ id, authedUser, hasLiked }) {  // acção nova definida
 }
 
 
-export function handleToggleTweet(info) {   // função que chama a api para atualizar na base e tb atualiza nossa store
+export function handleToggleTweet(info) {   
   return (dispatch) => {
     dispatch(toggleTweet(info))
     return saveLikeToggle(info)
